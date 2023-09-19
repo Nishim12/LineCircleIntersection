@@ -1,20 +1,43 @@
 import math
 import unittest
 
+#The points of the line won’t be inside the circle.
+#Coordinates and radiuses will be integer values.
 
 def intersection_circle_line(point1, point2, circle_center, radius):
   # Calculate the slope of the line
   if point2[0] - point1[0] != 0:
     slope_line = (point2[1] - point1[1]) / (point2[0] - point1[0])
+  
   else:
     # Handle the case when the line is vertical (undefined slope)
-    slope_line = float('inf')
+    # Put x-coordinate in the equation of circle to see if there is an
+    # intersection of line with circle
 
+      # Calculate the square of difference of y_cordinate of intersection and
+      # y_coordinate of center of circle
+        difference_y_square = radius ** 2 - (point1[0] - circle_center[0]) ** 2
+
+        if difference_y_square < 0:
+            print("No Intersection(s)")
+            return "No Intersection(s)", []
+        elif difference_y_square == 0:
+            # One intersection point
+            y_intersection = circle_center[1] + math.sqrt(difference_y_square)
+            print("One Intersection(s)")
+            return "One Intersection(s)", [(point1[0], y_intersection)]
+        else:
+            # Two intersection points
+            y1 = circle_center[1] + math.sqrt(difference_y_square)
+            y2 = circle_center[1] - math.sqrt(difference_y_square)
+            print("Two Intersection(s)")
+            return "Two Intersection(s)", [(point1[0], y1), (point1[0], y2)]
+      
   # Calculate the y-intercept of the line
   y_intercept = point1[1] - slope_line * point1[0]
 
-  # Calculate the coefficients of the quadratic equation representing the intersection
-  # of the line and the circle
+  # Calculate the coefficients of the quadratic equation representing the 
+  # intersection of the line and the circle
   x_square_coefficient = 1 + slope_line**2
   x_coefficient = -2 * circle_center[0] + 2 * slope_line * (y_intercept -
                                                             circle_center[1])
@@ -63,6 +86,24 @@ class TestIntersectionCircleLine(unittest.TestCase):
     self.assertEqual(result, "No Intersection(s)")
     self.assertEqual(points, [])
 
+  def test_case_5(self):
+    result, points = intersection_circle_line((5, 0), (5, 10), (0, 0), 4)
+    self.assertEqual(result, "No Intersection(s)")
+    self.assertEqual(points, [])
+  
+  def test_case_6(self):
+    result, points = intersection_circle_line((2, -4), (2, 5), (0, 0), 2)
+    self.assertEqual(result, "One Intersection(s)")
+    self.assertAlmostEqual(points[0][0], 2.000, places=3)
+    self.assertAlmostEqual(points[0][1], 0.000, places=3)
+
+  def test_case_7(self):
+    result, points = intersection_circle_line((1, -4), (1, 4), (0, 0), 2)
+    self.assertEqual(result, "Two Intersection(s)")
+    self.assertAlmostEqual(points[0][0], 1.000, places=3)
+    self.assertAlmostEqual(points[0][1], 1.732, places=3)
+    self.assertAlmostEqual(points[1][0], 1.000, places=3)
+    self.assertAlmostEqual(points[1][1], -1.732, places=3)
 
 if __name__ == '__main__':
   unittest.main()

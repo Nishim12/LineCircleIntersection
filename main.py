@@ -1,5 +1,6 @@
 import math
 import unittest
+import numpy as np
 
 #The points of the line won’t be inside the circle.
 #Coordinates and radiuses will be integer values.
@@ -63,8 +64,38 @@ def intersection_circle_line(point1, point2, circle_center, radius):
     print("Two Intersection(s)")
     return "Two Intersection(s)", [(x1, y1), (x2, y2)]
 
+# Assuming cylinder to be a vertical cylinder
+def cylinder_line_intersection(cylinder_center, cylinder_radius, line_start, line_end):
+    # Vector along the line
+    line_direction = np.array(line_end) - np.array(line_start)
 
-# Define a test class
+    # Calculate the coefficients of the quadratic equation for the intersection of the line and cylinder
+    a = line_direction[0] ** 2 + line_direction[1] ** 2
+    b = 2 * (line_direction[0] * (line_start[0] - cylinder_center[0]) + line_direction[1] * (line_start[1] - cylinder_center[1]))
+    c = (line_start[0] - cylinder_center[0]) ** 2 + (line_start[1] - cylinder_center[1]) ** 2 - cylinder_radius ** 2
+
+    # Calculate the discriminant
+    discriminant = b**2 - 4 * a * c
+
+    if discriminant < 0:
+        # No intersection
+        return 0, []
+
+    elif discriminant == 0:
+        # One intersection
+        t = -b / (2 * a)
+        intersection_point = np.array(line_start) + t * line_direction
+        return 1, [tuple(intersection_point)]
+
+    else:
+        # Two intersections
+        t1 = (-b + np.sqrt(discriminant)) / (2 * a)
+        t2 = (-b - np.sqrt(discriminant)) / (2 * a)
+        intersection_point1 = np.array(line_start) + t1 * line_direction
+        intersection_point2 = np.array(line_start) + t2 * line_direction
+        return 2, [tuple(intersection_point1), tuple(intersection_point2)]
+
+# Define a test class for intersection of circle and line
 class TestIntersectionCircleLine(unittest.TestCase):
 
   def test_case_1(self):
@@ -86,18 +117,18 @@ class TestIntersectionCircleLine(unittest.TestCase):
     self.assertEqual(result, "No Intersection(s)")
     self.assertEqual(points, [])
 
-  def test_case_5(self):
+  def test_case_4(self):
     result, points = intersection_circle_line((5, 0), (5, 10), (0, 0), 4)
     self.assertEqual(result, "No Intersection(s)")
     self.assertEqual(points, [])
   
-  def test_case_6(self):
+  def test_case_5(self):
     result, points = intersection_circle_line((2, -4), (2, 5), (0, 0), 2)
     self.assertEqual(result, "One Intersection(s)")
     self.assertAlmostEqual(points[0][0], 2.000, places=3)
     self.assertAlmostEqual(points[0][1], 0.000, places=3)
 
-  def test_case_7(self):
+  def test_case_6(self):
     result, points = intersection_circle_line((1, -4), (1, 4), (0, 0), 2)
     self.assertEqual(result, "Two Intersection(s)")
     self.assertAlmostEqual(points[0][0], 1.000, places=3)
@@ -105,5 +136,23 @@ class TestIntersectionCircleLine(unittest.TestCase):
     self.assertAlmostEqual(points[1][0], 1.000, places=3)
     self.assertAlmostEqual(points[1][1], -1.732, places=3)
 
+# Defined a test class to check intersection of Cylinder and line
+class TestCylinderLineIntersection(unittest.TestCase):
+
+    def test_two_intersection(self):
+        # Case where the line is outside the cylinder
+        cylinder_center = (0, 0, 0)
+        cylinder_radius = 2.0
+        line_start = (4, 0, 0)
+        line_end = (6, 0, 0)
+        num_intersections,points = cylinder_line_intersection(cylinder_center, cylinder_radius, line_start, line_end)
+        self.assertEqual(num_intersections, 2)
+        self.assertAlmostEqual(points[0][0], 4.386, places=3)
+        self.assertAlmostEqual(points[0][1], 0.000, places=3)
+        self.assertAlmostEqual(points[0][2], 0.000, places=3)
+        self.assertAlmostEqual(points[1][0], -6.386, places=3)
+        self.assertAlmostEqual(points[1][1], 0.000, places=3)
+        self.assertAlmostEqual(points[1][2], 0.000, places=3)
+
 if __name__ == '__main__':
-  unittest.main()
+    unittest.main()
